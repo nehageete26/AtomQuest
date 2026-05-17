@@ -158,6 +158,11 @@ atomquest-goal-portal/
 
 ---
 
+## Architecture
+
+<img width="1061" height="724" alt="image" src="https://github.com/user-attachments/assets/8e0eab57-dd50-4aae-afd3-f9787a3397d5" />
+
+
 ## 📄 License
 
 This project was built for the **ATOMQUEST HACKATHON 1.0 — FY 2025–26**.  
