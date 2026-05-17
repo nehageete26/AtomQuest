@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AtomQuest – Goal Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#0f0f13;--surface:#16161d;--surface2:#1e1e28;--surface3:#252533;
+--border:#2e2e3e;--accent:#f0b429;--accent2:#e07b39;
+--text:#e8e8f0;--text2:#9090a8;--text3:#5a5a72;
+--green:#34d399;--red:#f87171;--blue:#60a5fa;--purple:#a78bfa;--orange:#fb923c;
+--radius:12px;--radius-sm:8px;
+}
+html,body,#root{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:248px;min-width:248px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.main{flex:1;overflow-y:auto;background:var(--bg)}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-logo h1{font-family:'DM Serif Display',serif;font-size:20px;color:var(--accent)}
+.sidebar-logo p{font-size:11px;color:var(--text3);margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.role-switcher{padding:14px 18px;border-bottom:1px solid var(--border)}
+.role-switcher label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:7px}
+.role-switcher select{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer}
+.nav-section{padding:14px 12px 6px}
+.nav-section-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;padding:0 8px;margin-bottom:5px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(240,180,41,.12);color:var(--accent)}
+.sidebar-footer{margin-top:auto;padding:14px 18px;border-top:1px solid var(--border)}
+.user-badge{display:flex;align-items:center;gap:10px}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#000;flex-shrink:0}
+.user-name{font-size:13px;font-weight:500;color:var(--text)}
+.user-role{font-size:11px;color:var(--text3)}
+/* Window banner */
+.window-banner{padding:10px 18px;font-size:12px;border-bottom:1px solid var(--border);background:rgba(240,180,41,.07);color:var(--accent);display:flex;align-items:center;gap:8px}
+/* Page */
+.page{padding:28px 32px;max-width:1120px}
+.page-header{margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.page-title{font-family:'DM Serif Display',serif;font-size:28px;letter-spacing:-.5px}
+.page-subtitle{font-size:13px;color:var(--text2);margin-top:3px}
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+.card-title{font-size:12px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.stat-value{font-family:'DM Serif Display',serif;font-size:30px;letter-spacing:-1px}
+.stat-label{font-size:12px;color:var(--text2);margin-top:3px}
+.stat-badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;margin-top:7px}
+.badge-green{background:rgba(52,211,153,.15);color:var(--green)}
+.badge-yellow{background:rgba(240,180,41,.15);color:var(--accent)}
+.badge-red{background:rgba(248,113,113,.15);color:var(--red)}
+.badge-blue{background:rgba(96,165,250,.15);color:var(--blue)}
+.badge-purple{background:rgba(167,139,250,.15);color:var(--purple)}
+.badge-orange{background:rgba(251,146,60,.15);color:var(--orange)}
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 13px;color:var(--text3);font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);font-weight:500}
+td{padding:11px 13px;border-bottom:1px solid rgba(46,46,62,.5);color:var(--text2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.02)}
+/* Progress */
+.progress-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+/* Buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--accent);color:#000}.btn-primary:hover{background:#e0a820}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-secondary:hover{background:var(--surface3)}
+.btn-danger{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}.btn-danger:hover{background:rgba(248,113,113,.25)}
+.btn-success{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.3)}.btn-success:hover{background:rgba(52,211,153,.25)}
+.btn-purple{background:rgba(167,139,250,.15);color:var(--purple);border:1px solid rgba(167,139,250,.3)}.btn-purple:hover{background:rgba(167,139,250,.25)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-xs{padding:3px 8px;font-size:11px;border-radius:6px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* Forms */
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;color:var(--text2);font-weight:500;display:block;margin-bottom:5px}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:9px 12px;border-radius:var(--radius-sm);font-family:'DM Sans',sans-serif;font-size:13px;transition:border-color .15s}
+.form-input:focus,.form-select:focus,.form-textarea:focus{outline:none;border-color:var(--accent)}
+.form-textarea{resize:vertical;min-height:72px}
+.form-hint{font-size:11px;color:var(--text3);margin-top:3px}
+.form-error{font-size:11px;color:var(--red);margin-top:3px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;z-index:100;padding:20px;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);width:100%;max-width:660px;max-height:92vh;overflow-y:auto}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-family:'DM Serif Display',serif;font-size:20px}
+.modal-body{padding:22px}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+.modal-close{background:none;border:none;color:var(--text2);cursor:pointer;font-size:20px;padding:2px 6px;border-radius:4px}
+.modal-close:hover{background:var(--surface2)}
+/* Alert */
+.alert{padding:11px 14px;border-radius:var(--radius-sm);font-size:13px;margin-bottom:14px}
+.alert-warning{background:rgba(240,180,41,.1);border:1px solid rgba(240,180,41,.3);color:var(--accent)}
+.alert-error{background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:var(--red)}
+.alert-success{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:var(--green)}
+.alert-info{background:rgba(96,165,250,.1);border:1px solid rgba(96,165,250,.3);color:var(--blue)}
+/* Weight */
+.weight-tracker{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:14px}
+.weight-total{font-family:'DM Serif Display',serif;font-size:26px}
+.weight-total.ok{color:var(--green)}.weight-total.warn{color:var(--accent)}.weight-total.over{color:var(--red)}
+.weight-bar-wrap{flex:1}
+.weight-bar{height:7px;background:var(--surface3);border-radius:4px;overflow:hidden}
+.weight-bar-fill{height:100%;border-radius:4px;transition:width .3s,background .3s}
+/* Goal row */
+.goal-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px 18px;margin-bottom:10px}
+.goal-row-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.goal-row-title{font-size:14px;font-weight:500;color:var(--text)}
+.goal-row-meta{font-size:12px;color:var(--text3);margin-top:2px}
+.goal-row-body{margin-top:10px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.goal-meta-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.goal-meta-value{font-size:13px;color:var(--text);margin-top:2px;font-weight:500}
+/* Status */
+.status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:500}
+.status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+.status-draft{background:rgba(90,90,114,.2);color:var(--text3)}
+.status-pending{background:rgba(240,180,41,.15);color:var(--accent)}
+.status-approved{background:rgba(52,211,153,.15);color:var(--green)}
+.status-rejected{background:rgba(248,113,113,.15);color:var(--red)}
+.status-on-track{background:rgba(52,211,153,.15);color:var(--green)}
+.status-not-started{background:rgba(90,90,114,.2);color:var(--text3)}
+.status-completed{background:rgba(96,165,250,.15);color:var(--blue)}
+/* Tabs */
+.tabs{display:flex;gap:3px;background:var(--surface2);border-radius:var(--radius-sm);padding:4px;margin-bottom:22px;width:fit-content;flex-wrap:wrap}
+.tab{padding:7px 15px;border-radius:6px;font-size:13px;cursor:pointer;color:var(--text2);border:none;background:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.tab.active{background:var(--surface3);color:var(--text)}
+.tab:hover:not(.active){color:var(--text)}
+/* Toast */
+.toast-container{position:fixed;bottom:22px;right:22px;z-index:999;display:flex;flex-direction:column;gap:8px}
+.toast{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;color:var(--text);min-width:260px;animation:slideIn .2s ease;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.success{border-color:rgba(52,211,153,.4)}.toast.error{border-color:rgba(248,113,113,.4)}.toast.info{border-color:rgba(96,165,250,.4)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+/* Misc */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}.mb-24{margin-bottom:24px}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.gap-8{gap:8px}.gap-12{gap:12px}.flex-1{flex:1}
+.divider{height:1px;background:var(--border);margin:18px 0}
+.empty-state{text-align:center;padding:50px 20px;color:var(--text2)}
+.empty-state .icon{font-size:44px;margin-bottom:10px}
+.empty-state h3{font-family:'DM Serif Display',serif;font-size:20px;color:var(--text);margin-bottom:5px}
+.empty-state p{font-size:13px;color:var(--text3)}
+.audit-item{padding:11px 0;border-bottom:1px solid rgba(46,46,62,.5);font-size:12px}
+.audit-item:last-child{border-bottom:none}
+.audit-who{color:var(--accent);font-weight:500}
+.audit-what{color:var(--text2)}
+.audit-when{color:var(--text3)}
+.comment-box{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:10px 14px;font-size:13px;color:var(--text2);margin-top:10px}
+.score-circle{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600}
+.score-high{background:rgba(52,211,153,.15);color:var(--green)}
+.score-mid{background:rgba(240,180,41,.15);color:var(--accent)}
+.score-low{background:rgba(248,113,113,.15);color:var(--red)}
+/* Inline edit input in table */
+.inline-input{background:var(--surface3);border:1px solid var(--accent);color:var(--text);padding:4px 8px;border-radius:6px;font-size:13px;width:80px;font-family:'DM Sans',sans-serif}
+.inline-input:focus{outline:none}
+/* Heatmap */
+.heatmap-cell{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:default}
+/* Escalation badge */
+.esc-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:99px;font-size:11px;background:rgba(251,146,60,.15);color:var(--orange);border:1px solid rgba(251,146,60,.3)}
+/* Notification dot */
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--red);display:inline-block;margin-left:4px;vertical-align:middle}
+/* Window locked */
+.locked-banner{background:rgba(248,113,113,.08);border:1px solid rgba(248,113,113,.25);border-radius:var(--radius-sm);padding:10px 14px;font-size:13px;color:var(--red);margin-bottom:16px}
+/* Analytics chart bar */
+.chart-bar{display:flex;align-items:flex-end;gap:6px;height:120px;padding:10px 0}
+.chart-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.chart-bar-inner{width:100%;border-radius:4px 4px 0 0;transition:height .4s}
+.chart-label{font-size:10px;color:var(--text3)}
+.chart-val{font-size:11px;color:var(--text2)}
+</style>
+</head>
+<body><div id="root"></div>
+<script type="text/babel">
+const {useState,useEffect,useCallback,useMemo}=React;
+
+/* ── CONSTANTS ── */
+const THRUST_AREAS=['Sales & Revenue','Operations','Customer Success','Product & Engineering','People & Culture','Finance & Cost','Safety & Compliance','Digital & Innovation'];
+const UOM_TYPES=[
+  {value:'MIN',label:'Numeric – Higher is Better',eg:'e.g. Sales Revenue, NPS'},
+  {value:'MAX',label:'Numeric – Lower is Better',eg:'e.g. TAT, Cost, Defects'},
+  {value:'TIMELINE',label:'Timeline – Date Based',eg:'e.g. Project completion date'},
+  {value:'ZERO',label:'Zero-Based – Zero = Success',eg:'e.g. Safety incidents, Complaints'},
+];
+const QUARTERS=['Q1 (July)','Q2 (October)','Q3 (January)','Q4/Annual (March-April)'];
+const CHECK_IN_SCHEDULE=[
+  {period:'Goal Setting',window:'May',action:'Goal Creation, Submission & Approval'},
+  {period:'Q1 Check-in',window:'July',action:'Progress Update — Planned vs. Actual'},
+  {period:'Q2 Check-in',window:'October',action:'Progress Update — Planned vs. Actual'},
+  {period:'Q3 Check-in',window:'January',action:'Progress Update — Planned vs. Actual'},
+  {period:'Q4/Annual',window:'March-April',action:'Final Achievement Capture'},
+];
+// Simulate current window: 'goal-setting' | 'Q1' | 'Q2' | 'Q3' | 'Q4' | null
+const CURRENT_WINDOW='Q1'; // ← change to test enforcement
+
+const USERS=[
+  {id:'e1',name:'Priya Sharma',role:'employee',managerId:'m1',dept:'Sales',initials:'PS'},
+  {id:'e2',name:'Rohan Mehta',role:'employee',managerId:'m1',dept:'Sales',initials:'RM'},
+  {id:'e3',name:'Ananya Gupta',role:'employee',managerId:'m2',dept:'Engineering',initials:'AG'},
+  {id:'m1',name:'Vikram Nair',role:'manager',dept:'Sales',initials:'VN'},
+  {id:'m2',name:'Deepa Rao',role:'manager',dept:'Engineering',initials:'DR'},
+  {id:'a1',name:'HR Admin',role:'admin',dept:'HR',initials:'HA'},
+];
+
+/* ── SEED DATA ── */
+const INIT_GOALS=[
+  {id:'g1',employeeId:'e1',thrustArea:'Sales & Revenue',title:'Achieve Monthly Sales Target',description:'Hit ₹50L monthly revenue consistently',uomType:'MIN',target:50,weightage:40,status:'approved',isLocked:true,isShared:false,rejectionComment:''},
+  {id:'g2',employeeId:'e1',thrustArea:'Customer Success',title:'Improve NPS Score',description:'Increase Net Promoter Score from 32 to 45',uomType:'MIN',target:45,weightage:30,status:'approved',isLocked:true,isShared:false,rejectionComment:''},
+  {id:'g3',employeeId:'e1',thrustArea:'Operations',title:'Reduce Customer Complaints TAT',description:'Reduce complaint resolution time to <24hr',uomType:'MAX',target:24,weightage:20,status:'approved',isLocked:true,isShared:false,rejectionComment:''},
+  {id:'g4',employeeId:'e1',thrustArea:'Safety & Compliance',title:'Zero Safety Incidents',description:'Maintain zero workplace incidents',uomType:'ZERO',target:0,weightage:10,status:'approved',isLocked:true,isShared:false,rejectionComment:''},
+  {id:'g5',employeeId:'e2',thrustArea:'Sales & Revenue',title:'New Client Acquisition',description:'Onboard 15 new enterprise clients',uomType:'MIN',target:15,weightage:50,status:'pending',isLocked:false,isShared:false,rejectionComment:''},
+  {id:'g6',employeeId:'e2',thrustArea:'People & Culture',title:'Training Completion',description:'Complete all mandatory trainings by deadline',uomType:'TIMELINE',target:'2025-09-30',weightage:50,status:'pending',isLocked:false,isShared:false,rejectionComment:''},
+  {id:'g7',employeeId:'e3',thrustArea:'Product & Engineering',title:'Feature Delivery On Time',description:'Deliver Q3 roadmap features on schedule',uomType:'TIMELINE',target:'2025-10-31',weightage:60,status:'draft',isLocked:false,isShared:false,rejectionComment:''},
+  {id:'g8',employeeId:'e3',thrustArea:'Product & Engineering',title:'Reduce Bug Backlog',description:'Reduce open P1/P2 bugs by 40%',uomType:'MIN',target:40,weightage:40,status:'draft',isLocked:false,isShared:false,rejectionComment:''},
+];
+const INIT_CHECKINS=[
+  {id:'c1',goalId:'g1',quarter:'Q1 (July)',actual:42,status:'on-track',managerComment:'Good progress Priya. Focus on high-value accounts.',score:84},
+  {id:'c2',goalId:'g2',quarter:'Q1 (July)',actual:38,status:'on-track',managerComment:'',score:84},
+];
+const INIT_AUDIT=[
+  {id:'a1',goalId:'g1',goalTitle:'Achieve Monthly Sales Target',changedBy:'Vikram Nair',field:'status',oldValue:'pending',newValue:'approved',changedAt:'2025-05-15 10:30',reason:'Approved after review'},
+  {id:'a2',goalId:'g2',goalTitle:'Improve NPS Score',changedBy:'Vikram Nair',field:'weightage',oldValue:'25',newValue:'30',changedAt:'2025-05-15 10:35',reason:'Manager inline edit during approval'},
+];
+const INIT_ESCALATIONS=[
+  {id:'esc1',employeeId:'e2',type:'no-submission',message:'Rohan Mehta has pending goals not yet approved after 7 days.',resolvedAt:null,createdAt:'2025-05-18 09:00'},
+  {id:'esc2',employeeId:'e3',type:'no-checkin',message:'Ananya Gupta has not completed Q1 check-in — window closes in 3 days.',resolvedAt:null,createdAt:'2025-07-28 08:00'},
+];
+const INIT_NOTIFICATIONS=[
+  {id:'n1',userId:'e1',type:'approval',message:'Your goal "Achieve Monthly Sales Target" was approved by Vikram Nair.',read:false,createdAt:'2025-05-15 10:30'},
+  {id:'n2',userId:'e1',type:'checkin-reminder',message:'Q1 check-in window is now open (July). Please update your progress.',read:false,createdAt:'2025-07-01 09:00'},
+  {id:'n3',userId:'m1',type:'submission',message:'Rohan Mehta submitted goals for your approval.',read:false,createdAt:'2025-05-12 11:00'},
+  {id:'n4',userId:'m2',type:'escalation',message:'Escalation: Ananya Gupta Q1 check-in pending — 3 days remaining.',read:false,createdAt:'2025-07-28 08:00'},
+];
+
+/* ── UTILITIES ── */
+function computeScore(uomType,target,actual){
+  if(actual===''||actual===null||actual===undefined)return null;
+  const a=parseFloat(actual),t=parseFloat(target);
+  if(isNaN(a)||isNaN(t))return null;
+  switch(uomType){
+    case'MIN':return t===0?null:Math.min(Math.round(a/t*100),150);
+    case'MAX':return a===0?null:Math.min(Math.round(t/a*100),150);
+    case'TIMELINE':return new Date(a)<=new Date(t)?100:0;
+    case'ZERO':return a===0?100:0;
+    default:return null;
+  }
+}
+function scoreClass(s){if(s===null)return'';if(s>=100)return'score-high';if(s>=70)return'score-mid';return'score-low';}
+function scoreColor(s){if(s===null)return'var(--text3)';if(s>=100)return'var(--green)';if(s>=70)return'var(--accent)';return'var(--red)';}
+function totalWeight(goals){return goals.reduce((s,g)=>s+(parseFloat(g.weightage)||0),0);}
+function windowLabel(){const m={Q1:'Q1 (July)',Q2:'Q2 (October)',Q3:'Q3 (January)',Q4:'Q4/Annual (March-April)','goal-setting':'Goal Setting (May)'};return m[CURRENT_WINDOW]||'No active window';}
+function isCheckinOpen(){return['Q1','Q2','Q3','Q4'].includes(CURRENT_WINDOW);}
+function isGoalSettingOpen(){return CURRENT_WINDOW==='goal-setting';}
+
+/* ── TOAST ── */
+function ToastContainer({toasts}){
+  return<div className="toast-container">{toasts.map(t=><div key={t.id} className={`toast ${t.type}`}>{t.type==='success'?'✓ ':t.type==='error'?'✕ ':'ℹ '}{t.msg}</div>)}</div>;
+}
+
+/* ── STATUS PILL ── */
+function StatusPill({status}){
+  const map={draft:['status-draft','Draft'],pending:['status-pending','Pending Approval'],approved:['status-approved','Approved'],rejected:['status-rejected','Returned for Rework'],'on-track':['status-on-track','On Track'],'not-started':['status-not-started','Not Started'],completed:['status-completed','Completed']};
+  const[cls,label]=map[status]||['status-draft',status];
+  return<span className={`status ${cls}`}>{label}</span>;
+}
+
+/* ── WEIGHT TRACKER ── */
+function WeightTracker({total}){
+  const pct=Math.min(total,100);
+  const cls=total===100?'ok':total>100?'over':'warn';
+  const bc=total===100?'var(--green)':total>100?'var(--red)':'var(--accent)';
+  return(
+    <div className="weight-tracker">
+      <div><div className={`weight-total ${cls}`}>{total}%</div><div style={{fontSize:11,color:'var(--text3)'}}>Weightage</div></div>
+      <div className="weight-bar-wrap">
+        <div style={{display:'flex',justifyContent:'space-between',fontSize:10,color:'var(--text3)',marginBottom:5}}><span>0%</span><span>100%</span></div>
+        <div className="weight-bar"><div className="weight-bar-fill" style={{width:`${pct}%`,background:bc}}/></div>
+        <div style={{fontSize:11,color:'var(--text3)',marginTop:5}}>{total<100?`${100-total}% remaining`:total===100?'✓ Perfect allocation':`${total-100}% over limit`}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── NOTIFICATIONS PANEL ── */
+function NotificationsPanel({notifications,userId,onMarkRead,onClose}){
+  const mine=notifications.filter(n=>n.userId===userId);
+  const unread=mine.filter(n=>!n.read);
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:480}}>
+        <div className="modal-header">
+          <div className="modal-title">🔔 Notifications <span style={{fontSize:14,color:'var(--red)'}}>{unread.length>0?`(${unread.length} unread)`:''}</span></div>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+        <div className="modal-body" style={{padding:0}}>
+          {mine.length===0?<div className="empty-state"><div className="icon">🔕</div><h3>All caught up!</h3><p>No notifications yet.</p></div>:
+          mine.map(n=>(
+            <div key={n.id} style={{padding:'14px 20px',borderBottom:'1px solid var(--border)',background:n.read?'transparent':'rgba(240,180,41,.04)',display:'flex',gap:12,alignItems:'flex-start'}}>
+              <span style={{fontSize:18}}>{n.type==='approval'?'✅':n.type==='rejection'?'↩️':n.type==='submission'?'📨':n.type==='escalation'?'⚠️':'🔔'}</span>
+              <div style={{flex:1}}>
+                <div style={{fontSize:13,color:'var(--text)'}}>{n.message}</div>
+                <div style={{fontSize:11,color:'var(--text3)',marginTop:3}}>{n.createdAt}</div>
+              </div>
+              {!n.read&&<button className="btn btn-xs btn-secondary" onClick={()=>onMarkRead(n.id)}>Mark read</button>}
+            </div>
+          ))}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary btn-sm" onClick={()=>mine.forEach(n=>onMarkRead(n.id))}>Mark all read</button>
+          <button className="btn btn-secondary btn-sm" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── GOAL FORM MODAL ── */
+function GoalFormModal({onClose,onSave,goals,editGoal,isWindowOpen}){
+  const[form,setForm]=useState(editGoal?{...editGoal}:{thrustArea:THRUST_AREAS[0],title:'',description:'',uomType:'MIN',target:'',weightage:''});
+  const[errors,setErrors]=useState({});
+  const otherW=goals.filter(g=>!editGoal||g.id!==editGoal.id).reduce((s,g)=>s+(parseFloat(g.weightage)||0),0);
+  const thisW=parseFloat(form.weightage)||0;
+  const tot=otherW+thisW;
+  function validate(){
+    const e={};
+    if(!form.title.trim())e.title='Goal title required';
+    if(!String(form.target).trim())e.target='Target required';
+    if(!form.weightage)e.weightage='Weightage required';
+    else if(parseFloat(form.weightage)<10)e.weightage='Minimum 10%';
+    else if(tot>100)e.weightage=`Total would be ${tot}% — exceeds 100%`;
+    if(!editGoal&&goals.length>=8)e.general='Maximum 8 goals allowed per employee';
+    setErrors(e);return Object.keys(e).length===0;
+  }
+  function handleSave(){if(!validate())return;onSave({...form,id:editGoal?.id||`g_${Date.now()}`,status:editGoal?.status||'draft',isLocked:editGoal?.isLocked||false,isShared:editGoal?.isShared||false,rejectionComment:''});}
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-header"><div className="modal-title">{editGoal?'Edit Goal':'Add New Goal'}</div><button className="modal-close" onClick={onClose}>×</button></div>
+        <div className="modal-body">
+          {!isWindowOpen&&<div className="alert alert-warning">⚠ Goal setting window is currently closed. Contact Admin to make changes.</div>}
+          {errors.general&&<div className="alert alert-error">{errors.general}</div>}
+          <WeightTracker total={tot}/>
+          <div className="form-group">
+            <label className="form-label">Thrust Area *</label>
+            <select className="form-select" value={form.thrustArea} onChange={e=>setForm({...form,thrustArea:e.target.value})}>{THRUST_AREAS.map(t=><option key={t}>{t}</option>)}</select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Goal Title *</label>
+            <input className="form-input" placeholder="e.g. Achieve Monthly Sales Target" value={form.title} onChange={e=>setForm({...form,title:e.target.value})}/>
+            {errors.title&&<div className="form-error">{errors.title}</div>}
+          </div>
+          <div className="form-group">
+            <label className="form-label">Description</label>
+            <textarea className="form-textarea" placeholder="Describe this goal..." value={form.description} onChange={e=>setForm({...form,description:e.target.value})}/>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Unit of Measurement *</label>
+              <select className="form-select" value={form.uomType} onChange={e=>setForm({...form,uomType:e.target.value})}>{UOM_TYPES.map(u=><option key={u.value} value={u.value}>{u.label}</option>)}</select>
+              <div className="form-hint">{UOM_TYPES.find(u=>u.value===form.uomType)?.eg}</div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Target *</label>
+              <input className="form-input" type={form.uomType==='TIMELINE'?'date':'number'} value={form.target} onChange={e=>setForm({...form,target:e.target.value})}/>
+              {errors.target&&<div className="form-error">{errors.target}</div>}
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Weightage (%) * — min 10%, remaining: {100-otherW}%</label>
+            <input className="form-input" type="number" min="10" max="100" value={form.weightage} onChange={e=>setForm({...form,weightage:e.target.value})}/>
+            {errors.weightage&&<div className="form-error">{errors.weightage}</div>}
+          </div>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={!isWindowOpen&&!editGoal}>Save as Draft</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CHECKIN MODAL ── */
+function CheckinModal({goal,checkin,isManager,onClose,onSave,windowOpen}){
+  const[actual,setActual]=useState(checkin?.actual??'');
+  const[status,setStatus]=useState(checkin?.status??'not-started');
+  const[comment,setComment]=useState(checkin?.managerComment??'');
+  const[quarter,setQuarter]=useState(checkin?.quarter??`${CURRENT_WINDOW} (${CHECK_IN_SCHEDULE.find(s=>s.period.startsWith(CURRENT_WINDOW))?.window||''})`);
+  const score=computeScore(goal.uomType,goal.target,actual);
+  if(!windowOpen)return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal" style={{maxWidth:460}}>
+        <div className="modal-header"><div className="modal-title">Check-in Locked</div><button className="modal-close" onClick={onClose}>×</button></div>
+        <div className="modal-body"><div className="locked-banner">🔒 The check-in window for {quarter} is not currently open. Check-ins can only be submitted during the active quarterly window.</div><p style={{fontSize:13,color:'var(--text2)'}}>Current active window: <strong style={{color:'var(--accent)'}}>{windowLabel()}</strong></p></div>
+        <div className="modal-footer"><button className="btn btn-secondary" onClick={onClose}>Close</button></div>
+      </div>
+    </div>
+  );
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal">
+        <div className="modal-header"><div className="modal-title">{isManager?'Manager Check-in':'Update Achievement'}</div><button className="modal-close" onClick={onClose}>×</button></div>
+        <div className="modal-body">
+          <div className="card mb-16">
+            <div style={{fontSize:13,fontWeight:500,color:'var(--text)',marginBottom:8}}>{goal.title}</div>
+            <div style={{display:'flex',gap:20,fontSize:12,color:'var(--text2)',flexWrap:'wrap'}}>
+              <span>Target: <strong style={{color:'var(--text)'}}>{goal.target}</strong></span>
+              <span>UoM: <strong style={{color:'var(--text)'}}>{UOM_TYPES.find(u=>u.value===goal.uomType)?.label.split('–')[0].trim()}</strong></span>
+              <span>Weightage: <strong style={{color:'var(--text)'}}>{goal.weightage}%</strong></span>
+            </div>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Quarter</label>
+              <select className="form-select" value={quarter} onChange={e=>setQuarter(e.target.value)}>{QUARTERS.map(q=><option key={q}>{q}</option>)}</select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Progress Status</label>
+              <select className="form-select" value={status} onChange={e=>setStatus(e.target.value)}>
+                <option value="not-started">Not Started</option>
+                <option value="on-track">On Track</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div className="form-group">
+            <label className="form-label">Actual Achievement</label>
+            <input className="form-input" type={goal.uomType==='TIMELINE'?'date':'number'} placeholder="Enter actual value achieved" value={actual} onChange={e=>setActual(e.target.value)}/>
+          </div>
+          {score!==null&&(
+            <div className="alert alert-info" style={{display:'flex',alignItems:'center',gap:12}}>
+              <div className={`score-circle ${scoreClass(score)}`}>{score}%</div>
+              <div>
+                <div style={{fontWeight:500}}>Computed Progress Score</div>
+                <div style={{fontSize:11,marginTop:2}}>{goal.uomType==='MIN'?`${actual} ÷ ${goal.target} × 100`:goal.uomType==='MAX'?`${goal.target} ÷ ${actual} × 100`:goal.uomType==='ZERO'?`Value = ${actual} → ${score}%`:'Date comparison'}</div>
+              </div>
+            </div>
+          )}
+          {isManager&&(
+            <div className="form-group">
+              <label className="form-label">Structured Check-in Comment</label>
+              <textarea className="form-textarea" placeholder="Document the discussion — highlights, concerns, next steps..." value={comment} onChange={e=>setComment(e.target.value)}/>
+            </div>
+          )}
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={()=>onSave({goalId:goal.id,quarter,actual,status,managerComment:comment,score})}>Save Check-in</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   EMPLOYEE DASHBOARD
+══════════════════════════════════════════════ */
+function EmployeeDashboard({user,goals,checkins,notifications,onGoalAction,onCheckin,onMarkRead,addToast}){
+  const myGoals=goals.filter(g=>g.employeeId===user.id);
+  const[showForm,setShowForm]=useState(false);
+  const[editGoal,setEditGoal]=useState(null);
+  const[checkinGoal,setCheckinGoal]=useState(null);
+  const[showNotif,setShowNotif]=useState(false);
+  const[tab,setTab]=useState('goals');
+  const tw=totalWeight(myGoals);
+  const approved=myGoals.filter(g=>g.status==='approved').length;
+  const pending=myGoals.filter(g=>g.status==='pending').length;
+  const unread=notifications.filter(n=>n.userId===user.id&&!n.read).length;
+
+  function handleSave(goal){onGoalAction('save',{...goal,employeeId:user.id});setShowForm(false);setEditGoal(null);addToast('success','Goal saved as draft');}
+  function handleSubmitAll(){
+    const drafts=myGoals.filter(g=>g.status==='draft');
+    if(!drafts.length){addToast('error','No draft goals to submit');return;}
+    if(tw!==100){addToast('error',`Total weightage must be 100% (currently ${tw}%)`);return;}
+    drafts.forEach(g=>onGoalAction('submit',g.id));
+    addToast('success',`${drafts.length} goal(s) submitted for approval!`);
+  }
+
+  return(
+    <div className="page">
+      <div className="page-header">
+        <div>
+          <div className="page-title">My Goal Sheet</div>
+          <div className="page-subtitle">FY 2025–26 · {user.dept} · Window: <span style={{color:'var(--accent)'}}>{windowLabel()}</span></div>
+        </div>
+        <div className="flex gap-8 items-center">
+          <button className="btn btn-secondary" style={{position:'relative'}} onClick={()=>setShowNotif(true)}>
+            🔔 {unread>0&&<span className="notif-dot"/>}
+          </button>
+          {myGoals.some(g=>g.status==='draft')&&<button className="btn btn-primary" onClick={handleSubmitAll}>Submit All for Approval</button>}
+          <button className="btn btn-secondary" onClick={()=>{setEditGoal(null);setShowForm(true);}} disabled={myGoals.length>=8}>+ Add Goal {myGoals.length>=8?'(Max 8)':''}</button>
+        </div>
+      </div>
+
+      {!isGoalSettingOpen()&&!isCheckinOpen()&&<div className="locked-banner">🔒 No active window. Goal setting and check-ins are currently closed.</div>}
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-value">{myGoals.length}<span style={{fontSize:15,color:'var(--text3)'}}>/8</span></div><div className="stat-label">Total Goals</div></div>
+        <div className="stat-card"><div className="stat-value" style={{color:tw===100?'var(--green)':'var(--accent)'}}>{tw}%</div><div className="stat-label">Total Weightage</div>{tw===100?<div className="stat-badge badge-green">✓ Balanced</div>:<div className="stat-badge badge-yellow">Adjust needed</div>}</div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--green)'}}>{approved}</div><div className="stat-label">Approved Goals</div></div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--accent)'}}>{pending}</div><div className="stat-label">Pending Approval</div></div>
+      </div>
+
+      <div className="tabs">
+        {[['goals',`Goals (${myGoals.length})`],['checkins',`Check-ins (${checkins.filter(c=>myGoals.some(g=>g.id===c.goalId)).length})`]].map(([k,l])=>(
+          <button key={k} className={`tab ${tab===k?'active':''}`} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+
+      {tab==='goals'&&(
+        myGoals.length===0
+        ?<div className="empty-state"><div className="icon">🎯</div><h3>No Goals Yet</h3><p>Add your first goal to get started.</p></div>
+        :myGoals.map(goal=>{
+          const myC=checkins.filter(c=>c.goalId===goal.id);
+          return(
+            <div key={goal.id} className="goal-row">
+              <div className="goal-row-header">
+                <div>
+                  <div className="flex items-center gap-8" style={{marginBottom:3}}>
+                    <div className="goal-row-title">{goal.title}</div>
+                    {goal.isShared&&<span className="stat-badge badge-purple">Shared KPI</span>}
+                  </div>
+                  <div className="goal-row-meta">{goal.thrustArea} · {goal.description}</div>
+                </div>
+                <div className="flex items-center gap-8" style={{flexWrap:'wrap'}}>
+                  <StatusPill status={goal.status}/>
+                  {!goal.isLocked&&goal.status==='draft'&&<><button className="btn btn-secondary btn-sm" onClick={()=>{setEditGoal(goal);setShowForm(true);}}>Edit</button><button className="btn btn-primary btn-sm" onClick={()=>{if(tw!==100){addToast('error',`Total must be 100% (now ${tw}%)`);return;}onGoalAction('submit',goal.id);addToast('success','Submitted!');}}>Submit</button></>}
+                  {!goal.isLocked&&goal.status==='rejected'&&<><div style={{fontSize:12,color:'var(--red)'}}>↩ {goal.rejectionComment}</div><button className="btn btn-secondary btn-sm" onClick={()=>{setEditGoal(goal);setShowForm(true);}}>Rework</button></>}
+                  {goal.isLocked&&<button className="btn btn-secondary btn-sm" onClick={()=>setCheckinGoal(goal)}>Update Progress</button>}
+                </div>
+              </div>
+              <div className="goal-row-body">
+                <div className="goal-meta-item"><div className="goal-meta-label">UoM</div><div className="goal-meta-value">{UOM_TYPES.find(u=>u.value===goal.uomType)?.label.split('–')[0]}</div></div>
+                <div className="goal-meta-item"><div className="goal-meta-label">Target</div><div className="goal-meta-value">{goal.target}</div></div>
+                <div className="goal-meta-item"><div className="goal-meta-label">Weightage</div><div className="goal-meta-value">{goal.weightage}%</div></div>
+                <div className="goal-meta-item"><div className="goal-meta-label">Latest Score</div><div className="goal-meta-value">{myC.length>0&&myC[myC.length-1].score!==null?<span style={{color:scoreColor(myC[myC.length-1].score)}}>{myC[myC.length-1].score}%</span>:<span style={{color:'var(--text3)'}}>—</span>}</div></div>
+              </div>
+              {myC.length>0&&myC[myC.length-1].managerComment&&<div className="comment-box">💬 <strong>Manager:</strong> {myC[myC.length-1].managerComment}</div>}
+            </div>
+          );
+        })
+      )}
+
+      {tab==='checkins'&&(
+        <div className="card">
+          <div className="card-title">Quarterly Check-in History</div>
+          {checkins.filter(c=>myGoals.some(g=>g.id===c.goalId)).length===0
+          ?<div className="empty-state" style={{padding:'30px'}}><div className="icon">📋</div><h3>No Check-ins Yet</h3><p>Check-ins appear here after quarterly updates.</p></div>
+          :<div className="table-wrap"><table>
+            <thead><tr><th>Goal</th><th>Quarter</th><th>Actual</th><th>Status</th><th>Score</th><th>Manager Comment</th></tr></thead>
+            <tbody>{checkins.filter(c=>myGoals.some(g=>g.id===c.goalId)).map(c=>{
+              const g=myGoals.find(g=>g.id===c.goalId);
+              return<tr key={c.id}><td style={{color:'var(--text)',fontWeight:500}}>{g?.title}</td><td>{c.quarter}</td><td>{c.actual}</td><td><StatusPill status={c.status}/></td><td>{c.score!==null?<span className={`score-circle ${scoreClass(c.score)}`} style={{display:'inline-flex'}}>{c.score}%</span>:'—'}</td><td style={{maxWidth:200}}>{c.managerComment||<span style={{color:'var(--text3)'}}>—</span>}</td></tr>;
+            })}</tbody>
+          </table></div>}
+        </div>
+      )}
+
+      {showForm&&<GoalFormModal goals={myGoals.filter(g=>!editGoal||g.id!==editGoal.id)} editGoal={editGoal} onClose={()=>{setShowForm(false);setEditGoal(null);}} onSave={handleSave} isWindowOpen={isGoalSettingOpen()||!!editGoal}/>}
+      {checkinGoal&&<CheckinModal goal={checkinGoal} checkin={checkins.find(c=>c.goalId===checkinGoal.id)} isManager={false} onClose={()=>setCheckinGoal(null)} onSave={data=>{onCheckin(data);setCheckinGoal(null);addToast('success','Progress updated!');}} windowOpen={isCheckinOpen()}/>}
+      {showNotif&&<NotificationsPanel notifications={notifications} userId={user.id} onMarkRead={onMarkRead} onClose={()=>setShowNotif(false)}/>}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   MANAGER DASHBOARD
+══════════════════════════════════════════════ */
+function ManagerDashboard({user,goals,checkins,users,auditLog,notifications,onGoalAction,onCheckin,onMarkRead,addToast,onAudit}){
+  const myTeam=users.filter(u=>u.managerId===user.id);
+  const teamGoals=goals.filter(g=>myTeam.some(u=>u.id===g.employeeId));
+  const pendingGoals=teamGoals.filter(g=>g.status==='pending');
+  const[tab,setTab]=useState('pending');
+  const[rejectModal,setRejectModal]=useState(null);// {goalId,comment}
+  const[checkinGoal,setCheckinGoal]=useState(null);
+  const[showNotif,setShowNotif]=useState(false);
+  // Inline edit state: {[goalId]: {target, weightage}}
+  const[inlineEdits,setInlineEdits]=useState({});
+  const unread=notifications.filter(n=>n.userId===user.id&&!n.read).length;
+
+  function getEdited(goalId,field,original){return inlineEdits[goalId]?.[field]??original;}
+  function setEdited(goalId,field,val){setInlineEdits(prev=>({...prev,[goalId]:{...prev[goalId],[field]:val}}));}
+
+  function handleApprove(goal){
+    const edited=inlineEdits[goal.id]||{};
+    const newTarget=edited.target!==undefined?edited.target:goal.target;
+    const newWeight=edited.weightage!==undefined?edited.weightage:goal.weightage;
+    // Validate weight for this employee
+    const empGoals=pendingGoals.filter(g=>g.employeeId===goal.employeeId&&g.id!==goal.id);
+    const othersW=empGoals.reduce((s,g)=>s+(parseFloat(inlineEdits[g.id]?.weightage??g.weightage)||0),0);
+    const tot=othersW+(parseFloat(newWeight)||0);
+    if(tot>100){addToast('error',`Weightage would exceed 100% (${tot}%)`);return;}
+    onGoalAction('approve',goal.id,{target:newTarget,weightage:newWeight,managerId:user.id});
+    if(edited.target||edited.weightage){onAudit({goalId:goal.id,goalTitle:goal.title,changedBy:user.name,field:'inline-edit',oldValue:`target:${goal.target}, weight:${goal.weightage}%`,newValue:`target:${newTarget}, weight:${newWeight}%`,reason:'Manager inline edit during approval'});}
+    setInlineEdits(prev=>{const n={...prev};delete n[goal.id];return n;});
+    addToast('success','Goal approved and locked!');
+  }
+
+  function handleApproveAll(){
+    const groups={};
+    pendingGoals.forEach(g=>{if(!groups[g.employeeId])groups[g.employeeId]=[];groups[g.employeeId].push(g);});
+    let ok=true;
+    Object.entries(groups).forEach(([eid,gs])=>{
+      const tot=gs.reduce((s,g)=>s+(parseFloat(inlineEdits[g.id]?.weightage??g.weightage)||0),0);
+      if(tot!==100){addToast('error',`${users.find(u=>u.id===eid)?.name}'s goals total ${tot}% — must be exactly 100%`);ok=false;}
+    });
+    if(!ok)return;
+    pendingGoals.forEach(g=>handleApprove(g));
+  }
+
+  function handleReject(goalId,comment){
+    onGoalAction('reject',goalId,{comment});
+    setRejectModal(null);
+    addToast('success','Goal returned for rework');
+  }
+
+  return(
+    <div className="page">
+      <div className="page-header">
+        <div><div className="page-title">Team Dashboard</div><div className="page-subtitle">{user.dept} · {myTeam.length} members · Window: <span style={{color:'var(--accent)'}}>{windowLabel()}</span></div></div>
+        <div className="flex gap-8 items-center">
+          <button className="btn btn-secondary" style={{position:'relative'}} onClick={()=>setShowNotif(true)}>🔔 {unread>0&&<span className="notif-dot"/>}</button>
+          {pendingGoals.length>0&&<button className="btn btn-success" onClick={handleApproveAll}>Approve All ({pendingGoals.length})</button>}
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-value">{myTeam.length}</div><div className="stat-label">Team Members</div></div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--accent)'}}>{pendingGoals.length}</div><div className="stat-label">Pending Approvals</div>{pendingGoals.length>0&&<div className="stat-badge badge-yellow">Action needed</div>}</div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--green)'}}>{teamGoals.filter(g=>g.status==='approved').length}</div><div className="stat-label">Approved Goals</div></div>
+        <div className="stat-card"><div className="stat-value">{checkins.filter(c=>teamGoals.some(g=>g.id===c.goalId)).length}</div><div className="stat-label">Check-ins Done</div></div>
+      </div>
+
+      <div className="tabs">
+        {[['pending',`Pending (${pendingGoals.length})`],['team','Team Progress'],['checkins','Check-ins'],['audit','Audit Trail']].map(([k,l])=>(
+          <button key={k} className={`tab ${tab===k?'active':''}`} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+
+      {tab==='pending'&&(
+        pendingGoals.length===0
+        ?<div className="empty-state"><div className="icon">✅</div><h3>All Clear!</h3><p>No goals pending your approval.</p></div>
+        :myTeam.map(emp=>{
+          const empPending=pendingGoals.filter(g=>g.employeeId===emp.id);
+          if(!empPending.length)return null;
+          const tot=empPending.reduce((s,g)=>s+(parseFloat(inlineEdits[g.id]?.weightage??g.weightage)||0),0);
+          return(
+            <div key={emp.id} className="card mb-20">
+              <div className="flex items-center justify-between mb-16" style={{marginBottom:14}}>
+                <div className="flex items-center gap-8">
+                  <div className="user-avatar">{emp.initials}</div>
+                  <div><div style={{fontWeight:500,color:'var(--text)'}}>{emp.name}</div><div style={{fontSize:12,color:'var(--text3)'}}>{emp.dept}</div></div>
+                </div>
+                <WeightTracker total={tot}/>
+              </div>
+              <div className="alert alert-info" style={{fontSize:12}}>💡 You can inline-edit <strong>Target</strong> and <strong>Weightage</strong> before approving. Changes are logged to audit trail.</div>
+              <div className="table-wrap">
+                <table>
+                  <thead><tr><th>Goal</th><th>Thrust Area</th><th>UoM</th><th>Target (editable)</th><th>Weightage % (editable)</th><th>Actions</th></tr></thead>
+                  <tbody>{empPending.map(goal=>(
+                    <tr key={goal.id}>
+                      <td style={{color:'var(--text)',fontWeight:500,maxWidth:200}}>{goal.title}<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>{goal.description}</div></td>
+                      <td>{goal.thrustArea}</td>
+                      <td>{goal.uomType}</td>
+                      <td><input className="inline-input" type={goal.uomType==='TIMELINE'?'date':'number'} value={getEdited(goal.id,'target',goal.target)} onChange={e=>setEdited(goal.id,'target',e.target.value)}/></td>
+                      <td><input className="inline-input" type="number" min="10" max="100" value={getEdited(goal.id,'weightage',goal.weightage)} onChange={e=>setEdited(goal.id,'weightage',e.target.value)}/><span style={{fontSize:11,color:'var(--text3)',marginLeft:4}}>%</span></td>
+                      <td>
+                        <div className="flex gap-8">
+                          <button className="btn btn-success btn-xs" onClick={()=>handleApprove(goal)}>✓ Approve</button>
+                          <button className="btn btn-danger btn-xs" onClick={()=>setRejectModal({goalId:goal.id,comment:''})}>↩ Return</button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}</tbody>
+                </table>
+              </div>
+            </div>
+          );
+        })
+      )}
+
+      {tab==='team'&&myTeam.map(emp=>{
+        const empGoals=teamGoals.filter(g=>g.employeeId===emp.id&&g.status==='approved');
+        const empC=checkins.filter(c=>empGoals.some(g=>g.id===c.goalId));
+        // Weighted score
+        const wScore=empGoals.length>0?Math.round(empGoals.reduce((s,g)=>{const c=empC.find(ci=>ci.goalId===g.id);return s+(c?.score??0)*(g.weightage/100);},0)):null;
+        return(
+          <div key={emp.id} className="card mb-20">
+            <div className="flex items-center justify-between mb-16" style={{marginBottom:12}}>
+              <div className="flex items-center gap-8">
+                <div className="user-avatar">{emp.initials}</div>
+                <div><div style={{fontWeight:500,color:'var(--text)'}}>{emp.name}</div><div style={{fontSize:12,color:'var(--text3)'}}>{empGoals.length} approved goals</div></div>
+              </div>
+              {wScore!==null&&<div className="flex items-center gap-8"><span style={{fontSize:12,color:'var(--text2)'}}>Weighted Score:</span><div className={`score-circle ${scoreClass(wScore)}`}>{wScore}%</div></div>}
+            </div>
+            {empGoals.length===0?<div style={{fontSize:13,color:'var(--text3)'}}>No approved goals yet.</div>:
+            <div className="table-wrap"><table>
+              <thead><tr><th>Goal</th><th>Weight</th><th>Target</th><th>Q Actual</th><th>Score</th><th>Status</th><th>Action</th></tr></thead>
+              <tbody>{empGoals.map(g=>{
+                const ci=empC.find(c=>c.goalId===g.id);
+                return<tr key={g.id}><td style={{color:'var(--text)',fontWeight:500,maxWidth:180}}>{g.title}</td><td>{g.weightage}%</td><td>{g.target}</td><td>{ci?.actual??<span style={{color:'var(--text3)'}}>—</span>}</td><td>{ci?.score!=null?<span className={`score-circle ${scoreClass(ci.score)}`} style={{display:'inline-flex'}}>{ci.score}%</span>:'—'}</td><td>{ci?<StatusPill status={ci.status}/>:<StatusPill status="not-started"/>}</td><td><button className="btn btn-secondary btn-xs" onClick={()=>setCheckinGoal(g)}>Check-in</button></td></tr>;
+              })}</tbody>
+            </table></div>}
+          </div>
+        );
+      })}
+
+      {tab==='checkins'&&(
+        <div className="card">
+          <div className="card-title">All Check-in Records</div>
+          {checkins.filter(c=>teamGoals.some(g=>g.id===c.goalId)).length===0
+          ?<div className="empty-state" style={{padding:'30px'}}><div className="icon">📋</div><h3>No Check-ins</h3></div>
+          :<div className="table-wrap"><table>
+            <thead><tr><th>Employee</th><th>Goal</th><th>Quarter</th><th>Actual</th><th>Score</th><th>Comment</th></tr></thead>
+            <tbody>{checkins.filter(c=>teamGoals.some(g=>g.id===c.goalId)).map(c=>{
+              const g=teamGoals.find(g=>g.id===c.goalId);
+              const emp=myTeam.find(u=>u.id===g?.employeeId);
+              return<tr key={c.id}><td style={{color:'var(--text)'}}>{emp?.name}</td><td style={{color:'var(--text)',fontWeight:500}}>{g?.title}</td><td>{c.quarter}</td><td>{c.actual}</td><td>{c.score!=null?<span className={`score-circle ${scoreClass(c.score)}`} style={{display:'inline-flex'}}>{c.score}%</span>:'—'}</td><td style={{maxWidth:200}}>{c.managerComment||<span style={{color:'var(--text3)'}}>—</span>}</td></tr>;
+            })}</tbody>
+          </table></div>}
+        </div>
+      )}
+
+      {tab==='audit'&&(
+        <div className="card">
+          <div className="card-title">Audit Trail — Your Actions</div>
+          {auditLog.filter(a=>a.changedBy===user.name).length===0
+          ?<div className="empty-state" style={{padding:'30px'}}><div className="icon">📜</div><h3>No Entries</h3></div>
+          :auditLog.filter(a=>a.changedBy===user.name).map(entry=>(
+            <div key={entry.id} className="audit-item">
+              <div><span className="audit-who">{entry.changedBy}</span> <span className="audit-what"> changed <strong>{entry.field}</strong> of "{entry.goalTitle}" from <em>{entry.oldValue}</em> → <em>{entry.newValue}</em></span></div>
+              {entry.reason&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Reason: {entry.reason}</div>}
+              <div className="audit-when" style={{marginTop:3}}>{entry.changedAt}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {rejectModal&&(
+        <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setRejectModal(null)}>
+          <div className="modal" style={{maxWidth:440}}>
+            <div className="modal-header"><div className="modal-title">Return Goal for Rework</div><button className="modal-close" onClick={()=>setRejectModal(null)}>×</button></div>
+            <div className="modal-body">
+              <div className="form-group">
+                <label className="form-label">Reason for returning *</label>
+                <textarea className="form-textarea" placeholder="Explain what needs to be changed..." value={rejectModal.comment} onChange={e=>setRejectModal({...rejectModal,comment:e.target.value})}/>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={()=>setRejectModal(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={()=>{if(!rejectModal.comment.trim()){addToast('error','Reason required');return;}handleReject(rejectModal.goalId,rejectModal.comment);}}>Confirm Return</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {checkinGoal&&<CheckinModal goal={checkinGoal} checkin={checkins.find(c=>c.goalId===checkinGoal.id)} isManager={true} onClose={()=>setCheckinGoal(null)} onSave={data=>{onCheckin(data);setCheckinGoal(null);addToast('success','Check-in saved!');}} windowOpen={isCheckinOpen()}/>}
+      {showNotif&&<NotificationsPanel notifications={notifications} userId={user.id} onMarkRead={onMarkRead} onClose={()=>setShowNotif(false)}/>}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   ADMIN DASHBOARD
+══════════════════════════════════════════════ */
+function AdminDashboard({goals,checkins,users,auditLog,escalations,notifications,onGoalAction,onAudit,onResolveEsc,addToast,onPushNotif}){
+  const[tab,setTab]=useState('overview');
+  const employees=users.filter(u=>u.role==='employee');
+  const[sharedForm,setSharedForm]=useState({title:'',thrustArea:THRUST_AREAS[0],target:'',uomType:'MIN',targetEmployees:[]});
+  const[cycleWindow,setCycleWindow]=useState(CURRENT_WINDOW);
+
+  function downloadCSV(){
+    const rows=[['Employee','Dept','Goal','Thrust Area','UoM','Target','Weightage','Status','Shared','Q1 Actual','Q1 Score']];
+    goals.forEach(g=>{
+      const emp=users.find(u=>u.id===g.employeeId);
+      const ci=checkins.find(c=>c.goalId===g.id);
+      rows.push([emp?.name,emp?.dept,g.title,g.thrustArea,g.uomType,g.target,`${g.weightage}%`,g.status,g.isShared?'Yes':'No',ci?.actual??'—',ci?.score!=null?`${ci.score}%`:'—']);
+    });
+    const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='achievement_report.csv';a.click();
+    addToast('success','Report downloaded!');
+  }
+
+  function pushSharedGoal(){
+    if(!sharedForm.title||!sharedForm.target||!sharedForm.targetEmployees.length){addToast('error','Fill all fields and select employees');return;}
+    sharedForm.targetEmployees.forEach(eid=>{
+      onGoalAction('save',{id:`sg_${Date.now()}_${eid}`,employeeId:eid,thrustArea:sharedForm.thrustArea,title:sharedForm.title,description:'Shared departmental KPI',uomType:sharedForm.uomType,target:sharedForm.target,weightage:10,status:'approved',isLocked:true,isShared:true,rejectionComment:''});
+      onPushNotif({userId:eid,type:'shared-goal',message:`A shared KPI "${sharedForm.title}" was pushed to your goal sheet by HR Admin.`});
+    });
+    addToast('success',`Pushed to ${sharedForm.targetEmployees.length} employees!`);
+    setSharedForm({title:'',thrustArea:THRUST_AREAS[0],target:'',uomType:'MIN',targetEmployees:[]});
+  }
+
+  // Analytics data
+  const empScores=employees.map(emp=>{
+    const eg=goals.filter(g=>g.employeeId===emp.id&&g.status==='approved');
+    const ec=checkins.filter(c=>eg.some(g=>g.id===c.goalId));
+    const ws=eg.length>0?Math.round(eg.reduce((s,g)=>{const c=ec.find(ci=>ci.goalId===g.id);return s+(c?.score??0)*(g.weightage/100);},0)):0;
+    return{...emp,score:ws,goalCount:eg.length,checkinCount:ec.length};
+  });
+  const thrustDist=THRUST_AREAS.map(ta=>({name:ta,count:goals.filter(g=>g.thrustArea===ta).length})).filter(d=>d.count>0);
+
+  return(
+    <div className="page">
+      <div className="page-header">
+        <div><div className="page-title">Admin Control Panel</div><div className="page-subtitle">Org-wide oversight · FY 2025–26 · Window: <span style={{color:'var(--accent)'}}>{windowLabel()}</span></div></div>
+        <button className="btn btn-primary" onClick={downloadCSV}>⬇ Export CSV</button>
+      </div>
+
+      <div className="stats-grid">
+        <div className="stat-card"><div className="stat-value">{goals.length}</div><div className="stat-label">Total Goals</div></div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--green)'}}>{goals.filter(g=>g.status==='approved').length}</div><div className="stat-label">Approved</div></div>
+        <div className="stat-card"><div className="stat-value" style={{color:'var(--orange)'}}>{escalations.filter(e=>!e.resolvedAt).length}</div><div className="stat-label">Open Escalations</div>{escalations.filter(e=>!e.resolvedAt).length>0&&<div className="stat-badge badge-orange">Needs attention</div>}</div>
+        <div className="stat-card"><div className="stat-value">{checkins.length}</div><div className="stat-label">Check-ins Done</div></div>
+      </div>
+
+      <div className="tabs" style={{flexWrap:'wrap'}}>
+        {[['overview','Overview'],['analytics','Analytics'],['escalations',`Escalations ${escalations.filter(e=>!e.resolvedAt).length>0?`(${escalations.filter(e=>!e.resolvedAt).length})`:''}`.trim()],['shared','Push Shared KPI'],['audit','Audit Log'],['completion','Completion Board'],['cycle','Cycle Mgmt']].map(([k,l])=>(
+          <button key={k} className={`tab ${tab===k?'active':''}`} onClick={()=>setTab(k)}>{l}</button>
+        ))}
+      </div>
+
+      {tab==='overview'&&(
+        <div className="card">
+          <div className="card-title">All Employee Goals</div>
+          <div className="table-wrap"><table>
+            <thead><tr><th>Employee</th><th>Goal</th><th>Thrust Area</th><th>Weightage</th><th>Status</th><th>Locked</th><th>Actions</th></tr></thead>
+            <tbody>{goals.map(g=>{
+              const emp=users.find(u=>u.id===g.employeeId);
+              return<tr key={g.id}><td style={{color:'var(--text)'}}>{emp?.name}</td><td style={{color:'var(--text)',fontWeight:500}}>{g.title}{g.isShared&&<span className="stat-badge badge-purple" style={{marginLeft:6}}>Shared</span>}</td><td>{g.thrustArea}</td><td>{g.weightage}%</td><td><StatusPill status={g.status}/></td><td style={{color:g.isLocked?'var(--green)':'var(--text3)'}}>{g.isLocked?'🔒':'🔓'}</td><td>{g.isLocked&&<button className="btn btn-danger btn-xs" onClick={()=>{onGoalAction('unlock',g.id);onAudit({goalId:g.id,goalTitle:g.title,changedBy:'HR Admin',field:'isLocked',oldValue:'true',newValue:'false',reason:'Admin unlock'});addToast('success','Goal unlocked');}}>Unlock</button>}</td></tr>;
+            })}</tbody>
+          </table></div>
+        </div>
+      )}
+
+      {tab==='analytics'&&(
+        <div>
+          <div className="grid-2 mb-20">
+            <div className="card">
+              <div className="card-title">Employee Weighted Score (Q1)</div>
+              <div className="chart-bar">
+                {empScores.map(e=>(
+                  <div key={e.id} className="chart-col">
+                    <div className="chart-val">{e.score>0?`${e.score}%`:''}</div>
+                    <div className="chart-bar-inner" style={{height:`${e.score}%`,minHeight:e.score>0?4:0,background:e.score>=100?'var(--green)':e.score>=70?'var(--accent)':'var(--red)',borderRadius:'4px 4px 0 0'}}/>
+                    <div className="chart-label">{e.name.split(' ')[0]}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="card">
+              <div className="card-title">Goal Distribution by Thrust Area</div>
+              {thrustDist.map(d=>(
+                <div key={d.name} style={{display:'flex',alignItems:'center',gap:10,marginBottom:8}}>
+                  <div style={{fontSize:12,color:'var(--text2)',minWidth:140,flex:1}}>{d.name}</div>
+                  <div className="progress-bar" style={{flex:2}}><div className="progress-fill" style={{width:`${(d.count/goals.length)*100}%`,background:'var(--blue)'}}/></div>
+                  <div style={{fontSize:12,color:'var(--text3)',minWidth:20}}>{d.count}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="card">
+            <div className="card-title">Manager Effectiveness — Check-in Completion</div>
+            <div className="table-wrap"><table>
+              <thead><tr><th>Manager</th><th>Team Size</th><th>Check-ins Completed</th><th>Completion %</th></tr></thead>
+              <tbody>{users.filter(u=>u.role==='manager').map(mgr=>{
+                const team=users.filter(u=>u.managerId===mgr.id);
+                const tgoals=goals.filter(g=>team.some(u=>u.id===g.employeeId)&&g.status==='approved');
+                const done=checkins.filter(c=>tgoals.some(g=>g.id===c.goalId)).length;
+                const pct=tgoals.length>0?Math.round(done/tgoals.length*100):0;
+                return<tr key={mgr.id}><td style={{color:'var(--text)',fontWeight:500}}>{mgr.name}</td><td>{team.length}</td><td>{done}/{tgoals.length}</td><td><div style={{display:'flex',alignItems:'center',gap:8}}><div className="progress-bar" style={{flex:1}}><div className="progress-fill" style={{width:`${pct}%`,background:pct===100?'var(--green)':pct>50?'var(--accent)':'var(--red)'}}/></div><span style={{fontSize:12}}>{pct}%</span></div></td></tr>;
+              })}</tbody>
+            </table></div>
+          </div>
+        </div>
+      )}
+
+      {tab==='escalations'&&(
+        <div className="card">
+          <div className="card-title">Escalation Log — Rule-Based Alerts</div>
+          <div className="alert alert-warning" style={{fontSize:12}}>⚙ Escalation Rules: (1) Goals not submitted within 7 days → employee → manager. (2) Goals not approved within 7 days → manager → HR. (3) Check-in not completed within active window → manager → HR.</div>
+          {escalations.length===0?<div className="empty-state" style={{padding:'30px'}}><div className="icon">🟢</div><h3>No Escalations</h3></div>:
+          <div className="table-wrap"><table>
+            <thead><tr><th>Type</th><th>Message</th><th>Created</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>{escalations.map(e=>{
+              const emp=users.find(u=>u.id===e.employeeId);
+              return<tr key={e.id}><td><span className="esc-badge">{e.type==='no-submission'?'No Submission':e.type==='no-checkin'?'No Check-in':'General'}</span></td><td style={{color:'var(--text2)'}}>{e.message}</td><td style={{color:'var(--text3)'}}>{e.createdAt}</td><td>{e.resolvedAt?<span style={{color:'var(--green)',fontSize:12}}>✓ Resolved {e.resolvedAt}</span>:<span style={{color:'var(--red)',fontSize:12}}>● Open</span>}</td><td>{!e.resolvedAt&&<button className="btn btn-success btn-xs" onClick={()=>{onResolveEsc(e.id);addToast('success','Escalation resolved');}}>Resolve</button>}</td></tr>;
+            })}</tbody>
+          </table></div>}
+        </div>
+      )}
+
+      {tab==='shared'&&(
+        <div className="card" style={{maxWidth:580}}>
+          <div className="card-title">Push Departmental KPI to Employees</div>
+          <div className="alert alert-info" style={{fontSize:12}}>Recipients can adjust weightage only. Goal Title and Target are read-only for them. Achievement syncs across all linked goal sheets.</div>
+          <div className="form-group"><label className="form-label">Goal Title *</label><input className="form-input" value={sharedForm.title} onChange={e=>setSharedForm({...sharedForm,title:e.target.value})} placeholder="e.g. Zero Safety Incidents"/></div>
+          <div className="form-row">
+            <div className="form-group"><label className="form-label">Thrust Area</label><select className="form-select" value={sharedForm.thrustArea} onChange={e=>setSharedForm({...sharedForm,thrustArea:e.target.value})}>{THRUST_AREAS.map(t=><option key={t}>{t}</option>)}</select></div>
+            <div className="form-group"><label className="form-label">UoM Type</label><select className="form-select" value={sharedForm.uomType} onChange={e=>setSharedForm({...sharedForm,uomType:e.target.value})}>{UOM_TYPES.map(u=><option key={u.value} value={u.value}>{u.label}</option>)}</select></div>
+          </div>
+          <div className="form-group"><label className="form-label">Target *</label><input className="form-input" type={sharedForm.uomType==='TIMELINE'?'date':'number'} value={sharedForm.target} onChange={e=>setSharedForm({...sharedForm,target:e.target.value})}/></div>
+          <div className="form-group">
+            <label className="form-label">Push to Employees *</label>
+            <div style={{display:'flex',flexDirection:'column',gap:8,marginTop:4}}>
+              {employees.map(emp=>(
+                <label key={emp.id} style={{display:'flex',alignItems:'center',gap:8,cursor:'pointer',fontSize:13}}>
+                  <input type="checkbox" checked={sharedForm.targetEmployees.includes(emp.id)} onChange={e=>setSharedForm({...sharedForm,targetEmployees:e.target.checked?[...sharedForm.targetEmployees,emp.id]:sharedForm.targetEmployees.filter(id=>id!==emp.id)})}/>
+                  <span style={{color:'var(--text)'}}>{emp.name}</span><span style={{color:'var(--text3)'}}>{emp.dept}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+          <button className="btn btn-primary" onClick={pushSharedGoal}>Push Shared KPI</button>
+        </div>
+      )}
+
+      {tab==='audit'&&(
+        <div className="card">
+          <div className="card-title">Full Audit Trail — All Changes After Lock Date</div>
+          {auditLog.length===0?<div className="empty-state" style={{padding:'30px'}}><div className="icon">📜</div><h3>No Entries</h3></div>:
+          auditLog.map(entry=>(
+            <div key={entry.id} className="audit-item">
+              <div><span className="audit-who">{entry.changedBy}</span><span className="audit-what"> changed <strong>{entry.field}</strong> of "{entry.goalTitle}" · <em>{entry.oldValue}</em> → <em>{entry.newValue}</em></span></div>
+              {entry.reason&&<div style={{fontSize:11,color:'var(--text3)',marginTop:2}}>Reason: {entry.reason}</div>}
+              <div className="audit-when" style={{marginTop:3}}>{entry.changedAt}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {tab==='completion'&&(
+        <div>
+          <div className="alert alert-info mb-20">Active window: <strong>{windowLabel()}</strong>. Check-in completion status below.</div>
+          <div className="card">
+            <div className="card-title">Employee Check-in Completion — {windowLabel()}</div>
+            <div className="table-wrap"><table>
+              <thead><tr><th>Employee</th><th>Manager</th><th>Dept</th><th>Approved Goals</th><th>Check-ins Done</th><th>Completion</th></tr></thead>
+              <tbody>{employees.map(emp=>{
+                const eg=goals.filter(g=>g.employeeId===emp.id&&g.status==='approved');
+                const ec=checkins.filter(c=>eg.some(g=>g.id===c.goalId));
+                const pct=eg.length>0?Math.round(ec.length/eg.length*100):0;
+                const mgr=users.find(u=>u.id===emp.managerId);
+                return<tr key={emp.id}><td style={{color:'var(--text)',fontWeight:500}}>{emp.name}</td><td>{mgr?.name??'—'}</td><td>{emp.dept}</td><td>{eg.length}</td><td>{ec.length}</td><td><div style={{display:'flex',alignItems:'center',gap:8}}><div className="progress-bar" style={{flex:1}}><div className="progress-fill" style={{width:`${pct}%`,background:pct===100?'var(--green)':pct>50?'var(--accent)':'var(--red)'}}/></div><span style={{fontSize:12,color:'var(--text2)',minWidth:32}}>{pct}%</span></div></td></tr>;
+              })}</tbody>
+            </table></div>
+          </div>
+        </div>
+      )}
+
+      {tab==='cycle'&&(
+        <div className="card" style={{maxWidth:500}}>
+          <div className="card-title">Cycle Management</div>
+          <div className="alert alert-warning">⚠ In a production system, changing the active window triggers email/Teams notifications to all employees and managers.</div>
+          <div className="form-group" style={{marginTop:16}}>
+            <label className="form-label">Active Check-in Window (currently: <span style={{color:'var(--accent)'}}>{CURRENT_WINDOW}</span>)</label>
+            <select className="form-select" value={cycleWindow} onChange={e=>setCycleWindow(e.target.value)}>
+              <option value="goal-setting">Goal Setting (May)</option>
+              <option value="Q1">Q1 Check-in (July)</option>
+              <option value="Q2">Q2 Check-in (October)</option>
+              <option value="Q3">Q3 Check-in (January)</option>
+              <option value="Q4">Q4/Annual (March-April)</option>
+              <option value="">Closed (no active window)</option>
+            </select>
+            <div className="form-hint">Note: In this demo, the window is hard-coded as "{CURRENT_WINDOW}". In production, this would update the database and send notifications.</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>addToast('info',`Window set to "${cycleWindow}" (demo only — reload to apply)`)}>Update Window</button>
+          <div className="divider"/>
+          <div className="card-title">Check-in Schedule</div>
+          <table style={{marginTop:8}}>
+            <thead><tr><th>Period</th><th>Window Opens</th><th>Action</th></tr></thead>
+            <tbody>{CHECK_IN_SCHEDULE.map(s=><tr key={s.period} style={{background:s.period.startsWith(CURRENT_WINDOW)||s.period.includes('Goal')&&CURRENT_WINDOW==='goal-setting'?'rgba(240,180,41,.06)':'transparent'}}><td style={{color:'var(--text)',fontWeight:500}}>{s.period}</td><td>{s.window}</td><td style={{color:'var(--text2)'}}>{s.action}</td></tr>)}</tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   ROOT APP
+══════════════════════════════════════════════ */
+function App(){
+  const[activeRole,setActiveRole]=useState('e1');
+  const[goals,setGoals]=useState(INIT_GOALS);
+  const[checkins,setCheckins]=useState(INIT_CHECKINS);
+  const[auditLog,setAuditLog]=useState(INIT_AUDIT);
+  const[escalations,setEscalations]=useState(INIT_ESCALATIONS);
+  const[notifications,setNotifications]=useState(INIT_NOTIFICATIONS);
+  const[toasts,setToasts]=useState([]);
+
+  const currentUser=USERS.find(u=>u.id===activeRole);
+
+  function addToast(type,msg){const id=Date.now();setToasts(t=>[...t,{id,type,msg}]);setTimeout(()=>setToasts(t=>t.filter(x=>x.id!==id)),3200);}
+
+  function pushNotif(n){setNotifications(prev=>[...prev,{id:`n_${Date.now()}`,read:false,createdAt:new Date().toLocaleString(),...n}]);}
+
+  function handleGoalAction(action,payload,meta={}){
+    setGoals(prev=>{
+      switch(action){
+        case'save':{const i=prev.findIndex(g=>g.id===payload.id);return i>=0?prev.map(g=>g.id===payload.id?{...g,...payload}:g):[...prev,payload];}
+        case'submit':
+          // Notify manager
+          (()=>{const emp=USERS.find(u=>u.id===prev.find(g=>g.id===payload)?.employeeId);const mgr=USERS.find(u=>u.id===emp?.managerId);if(mgr)pushNotif({userId:mgr.id,type:'submission',message:`${emp?.name} submitted goals for your approval.`});})();
+          return prev.map(g=>g.id===payload?{...g,status:'pending'}:g);
+        case'approve':{
+          const updated=prev.map(g=>g.id===payload?{...g,status:'approved',isLocked:true,target:meta.target??g.target,weightage:meta.weightage??g.weightage}:g);
+          // Notify employee
+          (()=>{const g=prev.find(g=>g.id===payload);if(g)pushNotif({userId:g.employeeId,type:'approval',message:`Your goal "${g.title}" was approved by ${meta.managerId?USERS.find(u=>u.id===meta.managerId)?.name:'Manager'}.`});})();
+          return updated;}
+        case'reject':
+          (()=>{const g=prev.find(g=>g.id===payload);if(g)pushNotif({userId:g.employeeId,type:'rejection',message:`Your goal "${g.title}" was returned for rework. Reason: ${meta.comment||'See manager.'}`});})();
+          return prev.map(g=>g.id===payload?{...g,status:'rejected',rejectionComment:meta.comment||''}:g);
+        case'unlock':return prev.map(g=>g.id===payload?{...g,isLocked:false}:g);
+        default:return prev;
+      }
+    });
+  }
+
+  function handleCheckin(data){
+    const goal=goals.find(g=>g.id===data.goalId);
+    const score=computeScore(goal?.uomType,goal?.target,data.actual);
+    setCheckins(prev=>{
+      const i=prev.findIndex(c=>c.goalId===data.goalId&&c.quarter===data.quarter);
+      const entry={id:`c_${Date.now()}`,...data,score};
+      return i>=0?prev.map((c,idx)=>idx===i?{...c,...entry}:c):[...prev,entry];
+    });
+  }
+
+  function handleAudit(entry){setAuditLog(prev=>[...prev,{id:`al_${Date.now()}`,changedAt:new Date().toLocaleString(),...entry}]);}
+  function handleResolveEsc(id){setEscalations(prev=>prev.map(e=>e.id===id?{...e,resolvedAt:new Date().toLocaleString()}:e));}
+  function handleMarkRead(id){setNotifications(prev=>prev.map(n=>n.id===id?{...n,read:true}:n));}
+
+  const NAV={
+    employee:[{key:'goals',icon:'🎯',label:'My Goals'},{key:'checkins',icon:'📊',label:'Check-ins'}],
+    manager:[{key:'pending',icon:'✅',label:'Approvals'},{key:'team',icon:'👥',label:'Team Progress'},{key:'checkins',icon:'📋',label:'Check-ins'},{key:'audit',icon:'📜',label:'Audit Trail'}],
+    admin:[{key:'overview',icon:'🏛',label:'Overview'},{key:'analytics',icon:'📈',label:'Analytics'},{key:'escalations',icon:'⚠️',label:'Escalations'},{key:'shared',icon:'📢',label:'Shared KPI'},{key:'audit',icon:'📜',label:'Audit Log'},{key:'completion',icon:'✅',label:'Completion Board'},{key:'cycle',icon:'⚙️',label:'Cycle Mgmt'}],
+  };
+
+  const unreadCount=notifications.filter(n=>n.userId===activeRole&&!n.read).length;
+
+  return(
+    <div className="app">
+      <div className="sidebar">
+        <div className="sidebar-logo"><h1>⚛ AtomQuest</h1><p>Goal Tracking Portal</p></div>
+        <div className="role-switcher">
+          <label>Switch Role / User</label>
+          <select value={activeRole} onChange={e=>{setActiveRole(e.target.value);}}>
+            <optgroup label="Employees">{USERS.filter(u=>u.role==='employee').map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</optgroup>
+            <optgroup label="Managers">{USERS.filter(u=>u.role==='manager').map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</optgroup>
+            <optgroup label="Admin">{USERS.filter(u=>u.role==='admin').map(u=><option key={u.id} value={u.id}>{u.name}</option>)}</optgroup>
+          </select>
+        </div>
+        {/* Window status */}
+        <div className="window-banner">🗓 Active: <strong style={{marginLeft:4}}>{windowLabel()}</strong></div>
+        <div className="nav-section">
+          <div className="nav-section-label">Navigation</div>
+          {(NAV[currentUser.role]||[]).map(item=>(
+            <div key={item.key} className="nav-item">{item.icon} {item.label}{item.key==='pending'&&goals.filter(g=>g.status==='pending').length>0&&<span className="stat-badge badge-yellow" style={{marginLeft:'auto',padding:'1px 6px'}}>{goals.filter(g=>g.status==='pending').length}</span>}</div>
+          ))}
+        </div>
+        <div className="nav-section">
+          <div className="nav-section-label">Check-in Windows</div>
+          {CHECK_IN_SCHEDULE.map(s=>{
+            const active=(s.period.startsWith('Q1')&&CURRENT_WINDOW==='Q1')||(s.period.startsWith('Q2')&&CURRENT_WINDOW==='Q2')||(s.period.startsWith('Q3')&&CURRENT_WINDOW==='Q3')||(s.period.startsWith('Q4')&&CURRENT_WINDOW==='Q4')||(s.period.startsWith('Phase')&&CURRENT_WINDOW==='goal-setting');
+            return<div key={s.period} style={{display:'flex',justifyContent:'space-between',padding:'4px 8px',fontSize:11}}><span style={{color:'var(--text3)'}}>{s.period}</span><span style={{color:active?'var(--green)':'var(--text3)'}}>{s.window}{active?' ●':''}</span></div>;
+          })}
+        </div>
+        <div className="sidebar-footer">
+          <div className="user-badge">
+            <div className="user-avatar">{currentUser.initials}</div>
+            <div className="user-info"><div className="user-name">{currentUser.name}</div><div className="user-role">{currentUser.role.charAt(0).toUpperCase()+currentUser.role.slice(1)} · {currentUser.dept}</div></div>
+            {unreadCount>0&&<span style={{background:'var(--red)',color:'#fff',borderRadius:'99px',fontSize:11,padding:'2px 7px',marginLeft:'auto'}}>{unreadCount}</span>}
+          </div>
+        </div>
+      </div>
+
+      <div className="main">
+        {currentUser.role==='employee'&&<EmployeeDashboard user={currentUser} goals={goals} checkins={checkins} notifications={notifications} onGoalAction={handleGoalAction} onCheckin={handleCheckin} onMarkRead={handleMarkRead} addToast={addToast}/>}
+        {currentUser.role==='manager'&&<ManagerDashboard user={currentUser} goals={goals} checkins={checkins} users={USERS} auditLog={auditLog} notifications={notifications} onGoalAction={handleGoalAction} onCheckin={handleCheckin} onMarkRead={handleMarkRead} addToast={addToast} onAudit={handleAudit}/>}
+        {currentUser.role==='admin'&&<AdminDashboard goals={goals} checkins={checkins} users={USERS} auditLog={auditLog} escalations={escalations} notifications={notifications} onGoalAction={handleGoalAction} onAudit={handleAudit} onResolveEsc={handleResolveEsc} addToast={addToast} onPushNotif={pushNotif}/>}
+      </div>
+      <ToastContainer toasts={toasts}/>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
