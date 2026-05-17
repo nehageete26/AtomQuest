@@ -160,7 +160,7 @@ atomquest-goal-portal/
 
 ## 📄 License
 
-This project was built for the **Atomberg Internal Hackathon — FY 2025–26**.  
+This project was built for the **ATOMQUEST HACKATHON 1.0 — FY 2025–26**.  
 All rights reserved © Atomberg Technologies.
 
 ---
