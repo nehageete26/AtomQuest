@@ -60,12 +60,11 @@
 
 | Layer | Technology |
 |---|---|
-| Frontend | React 18 (via CDN, no build step) |
+| Frontend | HTML |
 | Styling | Pure CSS (custom design system, dark mode) |
-| State Management | React `useState` / `useEffect` |
 | Data Persistence | In-memory (session state) |
 | Fonts | Google Fonts — DM Sans + DM Serif Display |
-| Deployment | Vercel / Netlify (static, zero config) |
+| Deployment | Vercel |
 
 > **No Node.js. No npm. No database. No build tools required.**  
 > The entire application runs from a single `index.html` file.
