@@ -47,7 +47,7 @@
 - **Completion Dashboard** — real-time view of which employees have completed quarterly check-ins
 - **Full Audit Trail** — all changes made to goals after lock date, capturing who changed what and when
 
-### Bonus Features (Section 5)
+### Bonus Features
 - 🔔 **In-app Notification System** — approval, rejection, submission, shared KPI, and reminder alerts with unread badge count
 - ⚠️ **Escalation Module (Rule-Based)** — automated alerts for: no submission within 7 days, no approval within 7 days, check-in not completed within active window; Admin can resolve escalations
 - 📈 **Analytics Module** — employee weighted score chart, goal distribution by Thrust Area, Manager effectiveness dashboard (check-in completion comparison)
