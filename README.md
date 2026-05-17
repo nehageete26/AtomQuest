@@ -158,7 +158,7 @@ atomquest-goal-portal/
 
 ---
 
-## Architecture
+## ⚙️Architecture
 
 <img width="1061" height="724" alt="image" src="https://github.com/user-attachments/assets/8e0eab57-dd50-4aae-afd3-f9787a3397d5" />
 
